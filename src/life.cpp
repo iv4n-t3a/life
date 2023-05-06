@@ -1,16 +1,12 @@
 #include "life.h"
 
+#include <assert.h>
 
-Life::Life() {
-}
+
 Life::Life(int _w, int _h) {
-	resize(_w, _h);
-}
-
-void Life::resize(int _w, int _h) {
 	w = _w;
 	h = _h;
-	field.resize(h * w);
+	field = std::vector<Cond>(w * h, DEAD);
 }
 
 void Life::next() {
@@ -31,8 +27,8 @@ int Life::count_neighbours(int x, int y) {
 	for (int x_offset : {-1, 0, 1}) {
 		for (int y_offset : {-1, 0, 1}) {
 			int new_x, new_y;
-			new_x = (x + x_offset) % w;
-			new_y = (y + y_offset) % h;
+			new_x = x + x_offset;
+			new_y = y + y_offset;
 			Cond cond = at(new_x, new_y);
 			c += cond == ALIVE;
 		}
@@ -41,12 +37,18 @@ int Life::count_neighbours(int x, int y) {
 	return c;
 }
 
-size_t Life::to_i(int x, int y) {
-	return x * w + y;
-}
 Cond& Life::at(int x, int y) {
 	return field[to_i(x, y)];
 }
 void Life::switch_square(int x, int y) {
 	field[to_i(x, y)] = field[to_i(x, y)] == ALIVE ? DEAD : ALIVE;
+}
+size_t Life::to_i(int x, int y) {
+	return (x % w) * h + y % h;
+}
+int Life::get_w() {
+	return w;
+}
+int Life::get_h() {
+	return h;
 }

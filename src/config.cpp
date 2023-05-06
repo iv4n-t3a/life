@@ -10,8 +10,10 @@ Config generate_default_config() {
 	Config c;
 
 	c.square_size = 20;
+	c.field_h = 60;
+	c.field_w = 110;
 
-	c.etcdir = "/home/ivan/Projects/CHESS/etc/";
+	c.win_name = "Game Of Life";
 
 	c.square_color[ALIVE] = {0, 174, 0};
 	c.square_color[DEAD] = {50, 50, 50};
@@ -24,14 +26,13 @@ Config generate_config(int argc, char *argv[]) {
 	int i = 1;
 
 	for (; i < argc; i++) {
-		if (argv[i][0] != '-')
-			break;
-
 		std::string arg = argv[i];
-		if (arg == "-p" or arg == "--program-dir")
-			c.etcdir = argv[++i];
-		else if (arg == "-s" or arg == "--square-size")
+		if (arg == "-s" or arg == "--square-size")
 			c.square_size = atoi(argv[++i]);
+		else if (arg == "-w" or arg == "--field-wight")
+			c.field_w = atoi(argv[++i]);
+		else if (arg == "-h" or arg == "--field-height")
+			c.field_h = atoi(argv[++i]);
 		else if (arg == "-?" or arg == "--help")
 			throw HELPEXEPT;
 		else
