@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <assert.h>
+#include <iostream>
 
 #include "config.h"
 #include "ui.h"
@@ -80,22 +81,20 @@ void UI::update_scale(sf::Event wheelscroll) {
 	assert(wheelscroll.type == sf::Event::MouseWheelScrolled);
 
 	sf::Vector2u size = window.getSize();
-	int
-		delta = wheelscroll.mouseWheelScroll.delta,
-		new_square_size = square_size + delta,
-		new_win_w = size.x / new_square_size,
-		new_win_h = size.y / new_square_size;
+
+	int delta = wheelscroll.mouseWheelScroll.delta;
+	int new_square_size = square_size + delta;
+	int new_win_w = size.x / new_square_size;
+	int new_win_h = size.y / new_square_size;
 
 	if (
-			new_square_size <= 2 or new_square_size >= 60 or (
-				new_win_w > life.get_w() and new_win_h > life.get_h() and
-				new_square_size < square_size and new_square_size < cfg.square_size
-			)
+			new_square_size <= 2 or new_square_size >= 60 or
+				new_win_w > life.get_w() and new_win_h > life.get_h() and new_square_size < cfg.square_size
 	) return;
 
 	square_size = new_square_size;
-	win_x = std::max(win_x - new_win_w + win_w, 0);
-	win_y = std::max(win_y - new_win_h + win_h, 0);
+	win_x = std::max(win_x - (new_win_w - win_w) / 2, 0);
+	win_y = std::max(win_y - (new_win_h - win_h) / 2, 0);
 	win_w = new_win_w;
 	win_h = new_win_h;
 }
@@ -113,7 +112,6 @@ void UI::redraw() {
 	}
 	window.display();
 }
-
 sf::Color UI::to_sf_color(Color c) {
 	return sf::Color(c.r, c.g, c.b);
 }
