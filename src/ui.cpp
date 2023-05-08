@@ -8,21 +8,18 @@
 #include "ui.h"
 
 
+
 class UISetupState : public UIState {
 public:
 	virtual void update_life(Life&) override;
 	virtual void process_click(UI*, Life&, int x, int y) override;
 	virtual void process_space_pressed(UI*) override;
-private:
-	void switch_to_run(UI*);
 };
 class UIRunState : public UIState {
 public:
 	virtual void update_life(Life&) override;
 	virtual void process_click(UI*, Life&, int x, int y) override;
 	virtual void process_space_pressed(UI*) override;
-private:
-	void switch_to_setup(UI*);
 };
 
 UI::UI(sf::RenderWindow& w, Life l, Config c) : window(w), life(l), cfg(c) {
@@ -127,9 +124,6 @@ void UISetupState::process_click(UI*, Life& l, int x, int y) {
 	l.switch_square(x, y);
 }
 void UISetupState::process_space_pressed(UI* ui) {
-	switch_to_run(ui);
-}
-void UISetupState::switch_to_run(UI* ui) {
 	switch_state(ui, new UIRunState());
 }
 
@@ -138,11 +132,8 @@ void UIRunState::update_life(Life& l) {
 }
 void UIRunState::process_click(UI* ui, Life& l, int x, int y) {
 	l.switch_square(x, y);
-	switch_to_setup(ui);
+	switch_state(ui, new UISetupState());
 }
 void UIRunState::process_space_pressed(UI* ui) {
-	switch_to_setup(ui);
-}
-void UIRunState::switch_to_setup(UI* ui) {
 	switch_state(ui, new UISetupState());
 }
