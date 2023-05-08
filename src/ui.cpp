@@ -8,6 +8,22 @@
 #include "ui.h"
 
 
+class UISetupState : public UIState {
+public:
+	virtual void update_life(Life&) override;
+	virtual void process_click(UI*, Life&, int x, int y) override;
+	virtual void process_space_pressed(UI*) override;
+private:
+	void switch_to_run(UI*);
+};
+class UIRunState : public UIState {
+public:
+	virtual void update_life(Life&) override;
+	virtual void process_click(UI*, Life&, int x, int y) override;
+	virtual void process_space_pressed(UI*) override;
+private:
+	void switch_to_setup(UI*);
+};
 
 UI::UI(sf::RenderWindow& w, Life l, Config c) : window(w), life(l), cfg(c) {
 	sf::Vector2u size = window.getSize();
@@ -17,41 +33,22 @@ UI::UI(sf::RenderWindow& w, Life l, Config c) : window(w), life(l), cfg(c) {
 	win_x = 0;
 	win_y = 0;
 	redraw();
+	state = new UISetupState();
 }
 
-void UI::setup() {
-	sf::Event event;
-	while (window.isOpen()) {
-		redraw();
-		window.waitEvent(event);
-
-		if (event.type == sf::Event::MouseButtonPressed) {
-			switch_clicked(event);
-		} else if (event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Space) {
-			return;
-		} else if (event.type == sf::Event::KeyPressed) {
-			move_window(event);
-		} else if (event.type == sf::Event::MouseWheelScrolled) {
-			update_scale(event);
-		} else if (event.type == sf::Event::Closed) {
-			exit(0);
-		}
-	}
-}
 void UI::run() {
 	sf::Event event;
 	while (window.isOpen()) {
-		life.next();
 		redraw();
+		state->update_life(life);
 
-		if (not window.pollEvent(event))
+		if(not window.pollEvent(event))
 			continue;
 
 		if (event.type == sf::Event::MouseButtonPressed) {
-			switch_clicked(event);
-			setup();
+			process_click(event);
 		} else if (event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::Space) {
-			setup();
+			state->process_space_pressed(this);
 		} else if (event.type == sf::Event::KeyPressed) {
 			move_window(event);
 		} else if (event.type == sf::Event::MouseWheelScrolled) {
@@ -61,11 +58,11 @@ void UI::run() {
 		}
 	}
 }
-void UI::switch_clicked(sf::Event mouseclick) {
-	assert(mouseclick.type == sf::Event::MouseButtonPressed or mouseclick.type == sf::Event::MouseButtonReleased);
-	int x = (mouseclick.mouseButton.x / square_size + win_x) % life.get_w(),
-		y = (mouseclick.mouseButton.y / square_size + win_y) % life.get_h();
-	life.switch_square(x, y);
+void UI::process_click(sf::Event click) {
+	assert(click.type == sf::Event::MouseButtonPressed or click.type == sf::Event::MouseButtonReleased);
+	int x = (click.mouseButton.x / square_size + win_x) % life.get_w(),
+		y = (click.mouseButton.y / square_size + win_y) % life.get_h();
+	state->process_click(this, life, x, y);
 }
 void UI::move_window(sf::Event keypress) {
 	assert(keypress.type == sf::Event::KeyPressed or keypress.type == sf::Event::KeyReleased);
@@ -114,4 +111,38 @@ void UI::redraw() {
 }
 sf::Color UI::to_sf_color(Color c) {
 	return sf::Color(c.r, c.g, c.b);
+}
+
+void UI::switch_state(UIState* next) {
+	state = next;
+}
+void UIState::switch_state(UI* ui, UIState* next) {
+	ui->switch_state(next);
+}
+
+
+void UISetupState::update_life(Life&) {
+}
+void UISetupState::process_click(UI*, Life& l, int x, int y) {
+	l.switch_square(x, y);
+}
+void UISetupState::process_space_pressed(UI* ui) {
+	switch_to_run(ui);
+}
+void UISetupState::switch_to_run(UI* ui) {
+	switch_state(ui, new UIRunState());
+}
+
+void UIRunState::update_life(Life& l) {
+	l.next();
+}
+void UIRunState::process_click(UI* ui, Life& l, int x, int y) {
+	l.switch_square(x, y);
+	switch_to_setup(ui);
+}
+void UIRunState::process_space_pressed(UI* ui) {
+	switch_to_setup(ui);
+}
+void UIRunState::switch_to_setup(UI* ui) {
+	switch_state(ui, new UISetupState());
 }
