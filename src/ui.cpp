@@ -132,12 +132,12 @@ void UIState::switch_state(UI* ui, UIState* next) {
 }
 
 UISetup* UISetup::get_instance() {
-	static UISetup* instance = new UISetup();
-	return instance;
+	static UISetup i;
+	return &i;
 }
 UIRun* UIRun::get_instance() {
-	static UIRun* instance = new UIRun();
-	return instance;
+	static UIRun i;
+	return &i;
 }
 
 
