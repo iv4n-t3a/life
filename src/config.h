@@ -16,9 +16,8 @@ struct Color {
 };
 
 struct Config {
-    int square_size;
-	std::string etcdir;
-
+    int square_size, field_w, field_h;
+	std::string win_name;
 	Color bg_color;
 	std::array<Color, 2> square_color;
 };
