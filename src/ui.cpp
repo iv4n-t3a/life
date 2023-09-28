@@ -8,19 +8,34 @@
 #include "ui.h"
 
 
+class UIState {
+public:
+	virtual void update_life(Life&) = 0;
+	virtual void process_click(UI*, Life&, int x, int y) = 0;
+	virtual void process_space_pressed(UI*) = 0;
+protected:
+	void switch_state(UI*, UIState* next);
+};
 
-class UISetupState : public UIState {
+class UISetup : public UIState {
 public:
+	static UISetup* get_instance();
 	virtual void update_life(Life&) override;
 	virtual void process_click(UI*, Life&, int x, int y) override;
 	virtual void process_space_pressed(UI*) override;
+private:
+	UISetup() {}
 };
-class UIRunState : public UIState {
+class UIRun : public UIState {
 public:
+	static UIRun* get_instance();
 	virtual void update_life(Life&) override;
 	virtual void process_click(UI*, Life&, int x, int y) override;
 	virtual void process_space_pressed(UI*) override;
+private:
+	UIRun() {}
 };
+
 
 UI::UI(sf::RenderWindow& w, Life l, Config c) : window(w), life(l), cfg(c) {
 	sf::Vector2u size = window.getSize();
@@ -30,9 +45,8 @@ UI::UI(sf::RenderWindow& w, Life l, Config c) : window(w), life(l), cfg(c) {
 	win_x = 0;
 	win_y = 0;
 	redraw();
-	state = new UISetupState();
+	state = UISetup::get_instance();
 }
-
 void UI::run() {
 	sf::Event event;
 	while (window.isOpen()) {
@@ -117,23 +131,32 @@ void UIState::switch_state(UI* ui, UIState* next) {
 	ui->switch_state(next);
 }
 
-
-void UISetupState::update_life(Life&) {
+UISetup* UISetup::get_instance() {
+	static UISetup* instance = new UISetup();
+	return instance;
 }
-void UISetupState::process_click(UI*, Life& l, int x, int y) {
+UIRun* UIRun::get_instance() {
+	static UIRun* instance = new UIRun();
+	return instance;
+}
+
+
+void UISetup::update_life(Life&) {
+}
+void UISetup::process_click(UI*, Life& l, int x, int y) {
 	l.switch_square(x, y);
 }
-void UISetupState::process_space_pressed(UI* ui) {
-	switch_state(ui, new UIRunState());
+void UISetup::process_space_pressed(UI* ui) {
+	switch_state(ui, UIRun::get_instance());
 }
 
-void UIRunState::update_life(Life& l) {
+void UIRun::update_life(Life& l) {
 	l.next();
 }
-void UIRunState::process_click(UI* ui, Life& l, int x, int y) {
+void UIRun::process_click(UI* ui, Life& l, int x, int y) {
 	l.switch_square(x, y);
-	switch_state(ui, new UISetupState());
+	switch_state(ui, UISetup::get_instance());
 }
-void UIRunState::process_space_pressed(UI* ui) {
-	switch_state(ui, new UISetupState());
+void UIRun::process_space_pressed(UI* ui) {
+	switch_state(ui, UISetup::get_instance());
 }

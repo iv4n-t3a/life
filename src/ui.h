@@ -16,8 +16,6 @@
 class UIState;
 
 class UI {
-	friend UIState;
-
 	Life life;
 	sf::RenderWindow& window;
 	int win_w, win_h, win_x, win_y, square_size;
@@ -32,17 +30,10 @@ private:
 	void update_scale(sf::Event wheelscroll);
 	void redraw();
 
-	void switch_state(UIState* next);
 	sf::Color to_sf_color(Color);
-};
 
-class UIState {
-public:
-	virtual void update_life(Life&) = 0;
-	virtual void process_click(UI*, Life&, int x, int y) = 0;
-	virtual void process_space_pressed(UI*) = 0;
-protected:
-	void switch_state(UI*, UIState* next);
+	friend UIState;
+	void switch_state(UIState* next);
 };
 
 #endif // #ifndef UI_H
