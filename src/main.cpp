@@ -12,7 +12,8 @@ void help_and_exit() {
 		"	-s or --square_size set displayed square size in pixels" << std::endl <<
 		"	-w or --field-wight set field wight in squares" << std::endl <<
 		"	-h or --field-height set field height in squares" << std::endl <<
-		"	-? or --help show this message" << std::endl;
+		"	-? or --help show this message" << std::endl << std::endl <<
+		"use space to switch run/setup mode and up/down/left/right keys and mouse wheel for navigation" << std::endl;
 	std::exit(0);
 }
 
